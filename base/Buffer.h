@@ -4,7 +4,7 @@
  * @Autor: wx
  * @Date: 2020-07-24 12:28:39
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-07-27 20:52:06
+ * @LastEditTime: 2020-07-27 22:04:25
  */ 
 #ifndef _XNET_BUFFER_H_
 #define _XNET_BUFFER_H_
@@ -17,8 +17,6 @@
 #include "../base/copyable.h"
 
 namespace xnet
-{
-namespace net
 {
 // 目前buffer类缓存的数据存放在栈区
 /*
@@ -60,6 +58,12 @@ public:
         return begin() + m_writeIndex;
     }
 
+    // 返回vector容器
+    std::vector<char> getVec()
+    {
+        return m_buf;
+    }
+    
     const char* peek();
     void swap(Buffer&);
     void write(const void*, size_t);
@@ -75,6 +79,7 @@ public:
 
     // 更新读写下标
     void updateIdx(size_t len);
+
 private:
     // 返回缓冲区头部字符
     char* begin()
@@ -102,8 +107,6 @@ private:
     size_t m_readIndex;
     size_t m_writeIndex;
 };
-
-} // namespace net
 
 } // namespace xnet
 

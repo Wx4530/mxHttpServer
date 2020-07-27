@@ -4,7 +4,7 @@
  * @Autor: wx
  * @Date: 2020-07-24 12:28:39
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-07-27 20:53:23
+ * @LastEditTime: 2020-07-27 21:59:25
  */ 
 #include "Buffer.h"
 
@@ -52,9 +52,9 @@ void Buffer::write(const void* data, size_t len)
 
 
 // 交换两个Buffer对象
-void Buffer::swap(Buffer&)
+void Buffer::swap(Buffer& buf)
 {
-
+    std::swap(m_buf, buf.m_buf);
 }
 
 // 从文件描述符fd读取
@@ -71,7 +71,7 @@ int Buffer::writef(int fd)
 // 从缓冲区读取
 int Buffer::read(size_t n)
 {
-
+    
 }
 
 void Buffer::makeSpace(size_t addlen)
