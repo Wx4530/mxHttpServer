@@ -3,7 +3,6 @@
 webServer by c++
 
 - 使用epoll实现高并发
-
 - 使用线程池来实现资源的合理利用
 
 ## 资源目录简介
@@ -17,19 +16,6 @@ webServer by c++
 
 >1. web资源根目录
 >2. 存放网站资源
-
-- webserver文件夹
-
->1. http服务模块
->2. 封装自己的网络库xnet
->3. 使用xnet库实现一个小型的http服务器
-
-- 各文件夹目前状态
-
-> - lock\ log\ timer\ thread_pool\ mysql_conn
->   - todo
-> - socket\ http\ webserver\
->   - doing
 
 ## 总体架构
 
