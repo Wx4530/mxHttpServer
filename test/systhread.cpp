@@ -4,7 +4,7 @@
  * @github: https://github.com/Wx4530/mxHttpServer.git
  * @lastEditors: wx
  * @Date: 2020-07-27 23:26:38
- * @LastEditTime: 2020-07-28 00:00:50
+ * @LastEditTime: 2020-07-28 12:57:20
  * @Copyright: 1.0
  */ 
 
@@ -12,6 +12,7 @@
 
 #include "../xnet/sysAPI/SysPthread.h"
 
+using namespace xnet;
 
 void* func(void *)
 {

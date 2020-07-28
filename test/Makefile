@@ -1,12 +1,16 @@
-threadpool : threadpool.cpp ../xnet/sysAPI/Thread.o ../xnet/sysAPI/SysPthread.o
-	g++ $^ -o threadpool.out -lpthread
+all : threadpool systhread sync
 
-systhread : systhread.o
-	g++ $^ -lpthread -I ../xnet/sysAPI
+threadpool : threadpool.o ../xnet/sysAPI/Thread.o ../xnet/sysAPI/SysPthread.o
+	g++ $^ -o threadpool.out -lpthread -std=c++11
 
-systhread.o : systhread.cpp
-	g++ systhread.cpp -c -lpthread
+systhread : systhread.o ../xnet/sysAPI/SysPthread.o
+	g++ $^ -o systhread.out -lpthread
 
+sync : sync.cpp
+	g++ sync.cpp -o sync.out -lpthread -std=c++11 -O1
+
+%.o : %.cpp
+	g++ $^ -c -o $@ -lpthread -std=c++11 -O1
 
 clean:
 	rm -f *.out
