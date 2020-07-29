@@ -4,7 +4,7 @@
  * @github: https://github.com/Wx4530/myWebServer.git
  * @lastEditors: wx
  * @Date: 2020-07-26 13:34:07
- * @LastEditTime: 2020-07-27 21:14:22
+ * @LastEditTime: 2020-07-28 16:40:20
  * @Copyright: 1.0
  */ 
 
@@ -78,8 +78,8 @@ class Cond : noncopyable
 {
 public:
     Cond()
-        :   m_cond(PTHREAD_COND_INITIALIZER),
-            m_errno(0)
+        :   m_cond(PTHREAD_COND_INITIALIZER)
+            // m_errno(0)
     { }
     ~Cond()
     {
@@ -89,31 +89,35 @@ public:
     // 解锁并等待, 原子操作
     void wait(Mutex& mutex)
     {
-        if( (m_errno = pthread_cond_wait(&m_cond, mutex.get()) != 0))
+        if( (errno = pthread_cond_wait(&m_cond, mutex.get()) != 0))
             perror("cond wait error"), exit(1);
     }
     
     // 解锁并等待, 等待一定时间后返回
     void timewait(Mutex &mutex, struct timespec* tm)
     {
-        if( (m_errno = pthread_cond_timedwait(&m_cond, mutex.get(), tm) != 0))
+        if( (errno = pthread_cond_timedwait(&m_cond, mutex.get(), tm) != 0))
             perror("cond signal error"), exit(1);
     }
 
     void signal()
     {
-        if( (m_errno = pthread_cond_signal(&m_cond) != 0))
+        if( (errno = pthread_cond_signal(&m_cond) != 0))
             perror("cond signal error"), exit(1);
     }
 
     void broadcast()
     {
-        if( (m_errno = pthread_cond_broadcast(&m_cond) != 0))
+        if( (errno = pthread_cond_broadcast(&m_cond) != 0))
             perror("cond signal error"), exit(1);
+    }
+
+    pthread_cond_t& get()
+    {
+        return m_cond;
     }
 private:
     pthread_cond_t m_cond;
-    int m_errno;
 };
 
 // 信号量
