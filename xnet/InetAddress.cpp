@@ -4,7 +4,6 @@
 
 using namespace std;
 using namespace xnet;
-using namespace xnet::net;
 
 // 使用默认地址, 用户指定端口
 InetAddress::InetAddress(int port)
@@ -95,13 +94,19 @@ uint16_t InetAddress::getPort_p()
 }
 
 // 获取sockaddr对象
-const struct sockaddr* InetAddress::sockaddr()
+struct sockaddr* InetAddress::sockaddr()
 {
     return static_cast<struct sockaddr*>(static_cast<void*>(&m_sa));
 }
 
 // 获取socklen_t
 socklen_t InetAddress::getlen()
+{
+    return m_socklen;
+}
+
+// 获取socklen_t
+socklen_t& InetAddress::len()
 {
     return m_socklen;
 }

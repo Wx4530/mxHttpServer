@@ -22,28 +22,26 @@ public:
         :   m_bufin(),
             m_bufout()
     {
-        m_sockfd = sys::Socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        this->fd = sys::Socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_TCP);
     }
     explicit Socket(int sockfd)
-        :   m_sockfd(sockfd),
+        :   fd(sockfd),
             m_bufin(),
             m_bufout()
     { }
     
     ~Socket()
     {
-        close(m_sockfd);
+        close(this->fd);
     }
 
-    void setFlags(int flags);
-
-    int fd()
+    void setFlags(int newflags)
     {
-        return m_sockfd;
+        fcntl(fd, F_SETFL, newflags);
     }
 
-private:
-    int m_sockfd;
+public:
+    int fd;
     Buffer m_bufin;
     Buffer m_bufout;
 };  
