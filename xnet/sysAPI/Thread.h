@@ -4,25 +4,30 @@
  * @github: https://github.com/Wx4530/myWebServer.git
  * @lastEditors: wx
  * @Date: 2020-07-26 22:37:41
- * @LastEditTime: 2020-07-27 23:18:05
+ * @LastEditTime: 2020-07-29 23:53:19
  * @Copyright: 1.0
  */ 
-#ifndef _XNET_THREAD_H
-#define _XNET_THREAD_H
+#ifndef _XNET_THREAD_H_
+#define _XNET_THREAD_H_
 
 #include <functional>
 
 #include "SysPthread.h"
 
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE	  // <features.h>
+#endif // _GNU_SOURCE
+
 namespace xnet
 {
 
+typedef std::function<void ()> ThreadFunc;
 namespace thread
 {
 struct ThreadData
 {
-    std::function<void ()> func_;
-    ThreadData(std::function<void ()> func)
+    ThreadFunc func_;
+    ThreadData(ThreadFunc func)
         : func_(std::move(func))
     { }
 };
@@ -44,7 +49,6 @@ void* start(void* obj)
 class Thread
 {
 public:
-    typedef std::function<void ()> ThreadFunc;
     Thread(ThreadFunc);
     ~Thread();
     void join();
@@ -54,10 +58,41 @@ private:
     pthread_t m_tid;
     ThreadFunc m_func;
     bool m_bRun;
+    bool m_bDetached;
 };
 
+// 创建线程的同时启动线程
+Thread::Thread(ThreadFunc func)
+    :   m_bRun(true),
+        m_bDetached(false)
+{
+    thread::ThreadData* data = new thread::ThreadData(func);
+    Pthread_create(&m_tid, NULL, thread::start, data);
+}
 
+// 析构的时候设置线程分离, 当其完成当前任务后再销毁
+Thread::~Thread()
+{
+    // join();
+}
+
+// 回收一个线程, 不回收其返回值
+void Thread::join()
+{
+    pthread_join(m_tid, NULL);
+}
+
+pthread_t Thread::get_tid()
+{
+    return m_tid;
+}
+
+// 由于detach两次也不会出什么问题, 因此不设置标志位
+void Thread::detach()
+{
+    Pthread_detach(m_tid);
+}
 
 } // namespace xnet
 
-#endif // !_XNET_THREAD_H
+#endif // !_XNET_THREAD_H_

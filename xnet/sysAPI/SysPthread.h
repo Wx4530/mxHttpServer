@@ -1,3 +1,11 @@
+/*
+ * @Description: 
+ * @Version: 1.0
+ * @Autor: wx
+ * @Date: 2020-07-28 10:43:48
+ * @LastEditors: wx
+ * @LastEditTime: 2020-07-28 12:55:45
+ */ 
 #ifndef _XNET_WRAPPTHREAD_H_
 #define _XNET_WRAPPTHREAD_H_
 
@@ -15,6 +23,8 @@
 /*
  * pthreads wrapper functions.
  */
+namespace xnet
+{
 	
 void Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 			   void * (*func)(void *), void *arg);
@@ -36,8 +46,7 @@ void Pthread_key_create(pthread_key_t *key, void (*func)(void *));
 void Pthread_setspecific(pthread_key_t key, const void *value);
 
 
-
-// --------------------------------wrappthread.c----------------------------------------------------------
+} // namespace xnet
 
 
 #endif // !_XNET_WRAPPTHREAD_H_
