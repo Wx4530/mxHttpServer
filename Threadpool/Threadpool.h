@@ -4,7 +4,7 @@
  * @github: https://github.com/Wx4530/mxHttpServer.git
  * @lastEditors: wx
  * @Date: 2020-07-27 22:31:22
- * @LastEditTime: 2020-07-27 23:06:27
+ * @LastEditTime: 2020-07-29 22:17:06
  * @Copyright: 1.0
  */ 
 
@@ -14,6 +14,11 @@
 #include <functional>
 #include <vector>
 #include <queue>
+#include <stdexcept>
+#include <memory>
+#include <iostream>
+#include <unistd.h>
+#include <stdlib.h>
 
 
 #include "../base/sync.h"
@@ -26,11 +31,15 @@ namespace xnet
 class ThreadPool
 {
 public:
+    ThreadPool();
     ThreadPool(size_t nthreads);
     ~ThreadPool();
 
-    template<class F, class... Args>
-    void enqueue(F&& f, Args&&... args);
+    // template<class F, class... Args>
+    // void enqueue(F&& f, Args&&... args);
+    void enqueue(std::function<void()>);
+    void getStatus();
+    bool isClose();
 
 private:
     std::vector<xnet::Thread> m_workers;
@@ -42,6 +51,10 @@ private:
     bool m_bClose;     // 线程池是否关闭的标志
 };
 
+ThreadPool::ThreadPool()
+{
+    ThreadPool(8);
+}
 // 创建指定数目个线程
 ThreadPool::ThreadPool(size_t nthreads)
     :   m_bClose(false),
@@ -49,67 +62,83 @@ ThreadPool::ThreadPool(size_t nthreads)
 {
     m_workers.reserve(nthreads);
     for(size_t i = 0; i < nthreads; ++i)
-        m_workers.emplace_back([this]
-        {
-            for(;;)
-            {
-                std::function<void()> task;
+        m_workers.emplace_back(
+            [this]{
+                for(;;)
                 {
-                    xnet::Locker(this->m_mutex);  // 无须手动调用unlock, Locker在析构的时候会自动调用unlock
-                    // 如果线程池处于工作状态但是任务队列为空, 则工作线程阻塞等待任务的到来
-                    if(!m_bClose && m_tasks.empty())
-                    {
-                        this->m_cond.wait(this->m_mutex);
-                        // this->m_cond.timewait(this->m_mutex, &m_waittime);   // 等待一定时间后返回
-                    }
-                    // 线程池关闭标志发送后, 退出所有空闲线程
-                    if(m_bClose && this->m_tasks.empty())
-                        return;
+                    std::function<void()> task;
                     
-                    // 接受任务队列中的任务
-                    task = std::move(m_tasks.front());
-                    m_tasks.pop();
+                    {
+                        // 无须手动调用unlock, Locker在析构的时候会自动 调用unlock
+                        xnet::Locker lock(this->m_mutex);  
+                        // 如果线程池处于工作状态但是任务队列为空, 则工作线程阻塞等待任务的到来
+                        while(!this->m_bClose && this->m_tasks.empty())
+                        {
+                            std::cout << "waitting..." << std::endl;
+                            this->m_cond.wait(this->m_mutex);
+                            // this->m_cond.timewait(this->m_mutex, &m_waittime);   // 等待一定时间后返回
+                        }
+                        // 线程池关闭标志发送后, 退出所有空闲线程
+                        if(this->m_bClose)
+                        {
+                            return;
+                        }
+                        // 接受任务队列中的任务
+                        task = std::move(this->m_tasks.front());
+                        this->m_tasks.pop();
+                    }
+                    // 处理任务
+                    task();
                 }
-                // 处理任务
-                task();
-            }
-        });
+            });
 }
 
-// 向工作队列中添加任务
-template<class F, class... Args>
-void ThreadPool::enqueue(F&& f, Args&&... args) 
+void ThreadPool::enqueue(std::function<void()> task) 
 {
-    auto task = std::make_shared< std::function<void()> >(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-        );
-
+    // std::cout<< "task in" << std::endl;
     {
-        Locker(this->m_mutex);
+        xnet::Locker lock(this->m_mutex);
         // don't allow enqueueing after stopping the pool
-        if(m_bClose)
+        if(this->m_bClose)
             throw std::runtime_error("enqueue on stopped ThreadPool");
 
-        m_tasks.emplace([task](){ (*task)(); });
+        this->m_tasks.emplace([task]{ task(); });
     }
-    m_cond.signal();
+    this->m_cond.signal();
 }
 
 // 回收所有线程
 ThreadPool::~ThreadPool()
 {
     {
-        Locker(this->m_mutex);
+        xnet::Locker lock(this->m_mutex);
         m_bClose = true;
     }
+    std::cout << " broadcast " << std::endl;
     m_cond.broadcast();
-    for(Thread &thr : m_workers)
-        thr.join();
+    sleep(1);
+    for(auto thr : m_workers)
+    {
+        std::cout << thr.get_tid() << std::endl;
+    }
+    // for (auto thr : m_workers)
+    // {
+    //     thr.join();
+    // }
+    
+}
+
+void ThreadPool::getStatus()
+{
+    std::cout << "workers num: " << m_workers.size() << " tasks num: " << m_tasks.size() << std::endl;
+}
+
+bool ThreadPool::isClose()
+{
+    return m_bClose;
 }
 
 } // namespace xnet
-
-
 
 
 #endif // !_XNET_BASE_THREADPOOL_H_
