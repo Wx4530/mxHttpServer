@@ -33,4 +33,5 @@
 
 # User costom
 timer/
-
+.*
+Http*
