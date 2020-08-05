@@ -4,7 +4,7 @@
  * @github: https://github.com/Wx4530/myWebServer.git
  * @lastEditors: wx
  * @Date: 2020-07-26 13:34:07
- * @LastEditTime: 2020-07-28 16:40:20
+ * @LastEditTime: 2020-08-04 17:27:00
  * @Copyright: 1.0
  */ 
 
@@ -38,21 +38,21 @@ public:
     void lock()
     {
         int ret;
-        if(ret  = pthread_mutex_lock(&m_mutex))
+        if( (ret  = pthread_mutex_lock(&m_mutex)) != 0)
             printf("mutex lock failed: %s/n", strerror(ret));
     }
 
     void trylock()
     {
         int ret;
-        if(ret = pthread_mutex_trylock(&m_mutex))
+        if( (ret = pthread_mutex_trylock(&m_mutex)) != 0)
             printf("mutex trylock failed: %s/n", strerror(ret));
     }
 
     void unlock()
     {
         int ret;
-        if(ret = pthread_mutex_unlock(&m_mutex))
+        if( (ret = pthread_mutex_unlock(&m_mutex)) != 0)
             printf("mutex unlock failed: %s/n", strerror(ret));
     }
 
