@@ -1,13 +1,4 @@
-/*
- * @description: 线程池1.0, 提供固定个数个线程, 
- * @author: wx
- * @github: https://github.com/Wx4530/mxHttpServer.git
- * @lastEditors: wx
- * @Date: 2020-07-27 22:31:22
- * @LastEditTime: 2020-07-29 22:17:06
- * @Copyright: 1.0
- */ 
-
+#pragma once
 #ifndef _XNET_THREADPOOL_H_
 #define _XNET_THREADPOOL_H_
 
@@ -38,27 +29,36 @@ public:
     // template<class F, class... Args>
     // void enqueue(F&& f, Args&&... args);
     void enqueue(std::function<void()>);
-    void getStatus();
-    bool isClose();
+
+    void getStatus() const
+    {
+        std::cout << "workers num: " << m_workers.size() << " tasks num: " << m_tasks.size() << std::endl;
+    }
+
+    bool isClose() const
+    {
+        return m_bClose;
+    }
+
 
 private:
-    std::vector<xnet::Thread> m_workers;
-    std::queue<std::function<void()> > m_tasks;
 
     xnet::Mutex m_mutex;  // 互斥锁, 用来实现任务队列访问的同步
     xnet::Cond m_cond;    // 空闲的工作线程等待在该条件变量上
+    std::vector<xnet::Thread> m_workers;
+    std::queue<std::function<void()> > m_tasks;
     struct timespec m_waittime;    // 工作线程最大等待时间, 默认一分钟
     bool m_bClose;     // 线程池是否关闭的标志
 };
 
-ThreadPool::ThreadPool()
+inline ThreadPool::ThreadPool()
 {
     ThreadPool(8);
 }
 // 创建指定数目个线程
-ThreadPool::ThreadPool(size_t nthreads)
-    :   m_bClose(false),
-        m_waittime({60, 0})
+inline ThreadPool::ThreadPool(size_t nthreads)
+    :   m_waittime({60, 0}),
+        m_bClose(false)
 {
     m_workers.reserve(nthreads);
     for(size_t i = 0; i < nthreads; ++i)
@@ -74,7 +74,7 @@ ThreadPool::ThreadPool(size_t nthreads)
                         // 如果线程池处于工作状态但是任务队列为空, 则工作线程阻塞等待任务的到来
                         while(!this->m_bClose && this->m_tasks.empty())
                         {
-                            std::cout << "waitting..." << std::endl;
+                            std::cout << "waitting for task" << std::endl;
                             this->m_cond.wait(this->m_mutex);
                             // this->m_cond.timewait(this->m_mutex, &m_waittime);   // 等待一定时间后返回
                         }
@@ -93,7 +93,7 @@ ThreadPool::ThreadPool(size_t nthreads)
             });
 }
 
-void ThreadPool::enqueue(std::function<void()> task) 
+inline void ThreadPool::enqueue(std::function<void()> task) 
 {
     // std::cout<< "task in" << std::endl;
     {
@@ -108,37 +108,29 @@ void ThreadPool::enqueue(std::function<void()> task)
 }
 
 // 回收所有线程
-ThreadPool::~ThreadPool()
+inline ThreadPool::~ThreadPool()
 {
     {
         xnet::Locker lock(this->m_mutex);
         m_bClose = true;
     }
-    std::cout << " broadcast " << std::endl;
+    std::cout << " ===========================================broadcast " << std::endl;
     m_cond.broadcast();
-    sleep(1);
-    for(auto thr : m_workers)
-    {
-        std::cout << thr.get_tid() << std::endl;
-    }
-    // for (auto thr : m_workers)
-    // {
-    //     thr.join();
-    // }
+    // sleep(1);
     
+    // pthread_mutex_destroy(m_mutex.get());
+    // pthread_cond_destroy(&m_cond.get());
+    int i = 0;
+    for (auto thr : m_workers)
+    {
+        std::cout << thr.tid << " =============================join " << i++ << std::endl;
+        thr.join();
+    }
+    std::cout << "joined all" << std::endl;
 }
 
-void ThreadPool::getStatus()
-{
-    std::cout << "workers num: " << m_workers.size() << " tasks num: " << m_tasks.size() << std::endl;
-}
-
-bool ThreadPool::isClose()
-{
-    return m_bClose;
-}
 
 } // namespace xnet
 
 
-#endif // !_XNET_BASE_THREADPOOL_H_
+#endif // !_XNET_THREADPOOL_H_
