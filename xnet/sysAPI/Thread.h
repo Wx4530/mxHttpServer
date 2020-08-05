@@ -1,18 +1,9 @@
-/*
- * @description: Thread类, 对pthread的简单封装
- * @author: wx
- * @github: https://github.com/Wx4530/myWebServer.git
- * @lastEditors: wx
- * @Date: 2020-07-26 22:37:41
- * @LastEditTime: 2020-07-29 23:53:19
- * @Copyright: 1.0
- */ 
+ #pragma once
 #ifndef _XNET_THREAD_H_
 #define _XNET_THREAD_H_
-
+#include <iostream>
 #include <functional>
-
-#include "SysPthread.h"
+#include <pthread.h>
 
 #if !defined(_GNU_SOURCE)
 #define _GNU_SOURCE	  // <features.h>
@@ -32,7 +23,7 @@ struct ThreadData
     { }
 };
 
-void* start(void* obj)
+static void* start(void* obj)
 {
   ThreadData* data = static_cast<ThreadData*>(obj);
   data->func_();
@@ -49,49 +40,48 @@ void* start(void* obj)
 class Thread
 {
 public:
-    Thread(ThreadFunc);
-    ~Thread();
-    void join();
-    pthread_t get_tid();
-    void detach();
-private:
-    pthread_t m_tid;
-    ThreadFunc m_func;
-    bool m_bRun;
-    bool m_bDetached;
+    // 创建线程的同时启动线程
+    Thread(ThreadFunc func)
+        :   joinable(true)
+    {
+        thread::ThreadData* data = new thread::ThreadData(func);
+        pthread_create(&tid, NULL, thread::start, data);
+    }
+
+    // 不单独给出join接口, 线程对象销毁时自动join
+    ~Thread()
+    {
+        // if(joinable)
+        // {
+        //     pthread_join(tid, NULL);
+        // }
+        // pthread_cancel(tid);
+        // pthread_exit(NULL);
+        std::cout << "~Thread() called" << std::endl;
+    }
+    
+    // 设置标志位, 设置线程分离
+    void detach()
+    {
+        joinable = false;
+        pthread_detach(tid);
+    }
+
+    // 设置标志位, 等待线程结束
+    void join()
+    {
+        if(joinable)
+        {
+            joinable = false;
+            pthread_join(tid, NULL);
+        }
+    }
+
+public:
+    pthread_t tid;
+    bool joinable;
 };
 
-// 创建线程的同时启动线程
-Thread::Thread(ThreadFunc func)
-    :   m_bRun(true),
-        m_bDetached(false)
-{
-    thread::ThreadData* data = new thread::ThreadData(func);
-    Pthread_create(&m_tid, NULL, thread::start, data);
-}
-
-// 析构的时候设置线程分离, 当其完成当前任务后再销毁
-Thread::~Thread()
-{
-    // join();
-}
-
-// 回收一个线程, 不回收其返回值
-void Thread::join()
-{
-    pthread_join(m_tid, NULL);
-}
-
-pthread_t Thread::get_tid()
-{
-    return m_tid;
-}
-
-// 由于detach两次也不会出什么问题, 因此不设置标志位
-void Thread::detach()
-{
-    Pthread_detach(m_tid);
-}
 
 } // namespace xnet
 

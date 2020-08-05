@@ -3,11 +3,11 @@
  * @Version: 1.0
  * @Autor: wx
  * @Date: 2020-07-28 10:43:48
- * @LastEditors: wx
- * @LastEditTime: 2020-07-28 12:55:45
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2020-08-04 16:40:35
  */ 
-#ifndef _XNET_WRAPPTHREAD_H_
-#define _XNET_WRAPPTHREAD_H_
+#ifndef _XNET_SYSPTHREAD_H_
+#define _XNET_SYSPTHREAD_H_
 
 #include <pthread.h>
 
@@ -25,7 +25,7 @@
  */
 namespace xnet
 {
-	
+
 void Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 			   void * (*func)(void *), void *arg);
 
@@ -45,9 +45,8 @@ void Pthread_key_create(pthread_key_t *key, void (*func)(void *));
 
 void Pthread_setspecific(pthread_key_t key, const void *value);
 
-
 } // namespace xnet
 
 
-#endif // !_XNET_WRAPPTHREAD_H_
+#endif // !_XNET_SYSPTHREAD_H_
 

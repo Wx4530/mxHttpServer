@@ -4,8 +4,10 @@
  * @Autor: wx
  * @Date: 2020-07-24 12:28:39
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-07-29 23:10:22
+ * @LastEditTime: 2020-07-30 23:28:43
  */ 
+#ifndef _XNET_BUFFER_H_
+#define _XNET_BUFFER_H_
 
 
 #include <string>
@@ -34,7 +36,7 @@ public:
     static const size_t kPreHeaderLen = 8;
     static const size_t kInitialSize = 1024;
 
-    Buffer();
+    // Buffer();
     Buffer(size_t initialSize = 1024);
 
     // 返回可读的字节数， m_writeIndex - m_readIndex;
@@ -106,3 +108,6 @@ private:
 };
 
 } // namespace xnet
+
+
+#endif // !_XNET_BUFFER_H_

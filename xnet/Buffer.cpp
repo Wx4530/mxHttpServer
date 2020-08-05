@@ -6,24 +6,24 @@
 using namespace std;
 using namespace xnet;
 
-Buffer::Buffer()
-    :   m_readIndex(kPreHeaderLen),
-        m_writeIndex(kPreHeaderLen)
-{
-    assert(readableBytes() == 0);
-    assert(writableBytes() == kInitialSize);
-    assert(leftBlank() == kPreHeaderLen);
-    m_buf.reserve(kPreHeaderLen + kInitialSize);
-}
+// Buffer::Buffer()
+//     :   m_readIndex(kPreHeaderLen),
+//         m_writeIndex(kPreHeaderLen)
+// {
+//     assert(readableBytes() == 0);
+//     assert(writableBytes() == kInitialSize);
+//     assert(leftBlank() == kPreHeaderLen);
+//     m_buf.reserve(kPreHeaderLen + kInitialSize);
+// }
 
 Buffer::Buffer(size_t initialSize)
     :   m_readIndex(kPreHeaderLen),
         m_writeIndex(kPreHeaderLen)
 {
+    m_buf.reserve(kPreHeaderLen + initialSize);
     assert(readableBytes() == 0);
     assert(writableBytes() == initialSize);
-    assert(leftBlank() == kPreHeaderLen);
-    m_buf.reserve(kPreHeaderLen + initialSize);
+    assert(leftBlank() == 0);
 }
 
 // 找到开始读取的地址

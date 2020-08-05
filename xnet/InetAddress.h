@@ -4,7 +4,7 @@
  * @Autor: wx
  * @Date: 2020-07-28 10:43:48
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-07-29 22:29:48
+ * @LastEditTime: 2020-08-04 22:08:41
  */ 
 #ifndef _XNET_INETADDRESS_H_
 #define _XNET_INETADDRESS_H_
@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <string>
 #include <memory>
+#include <string.h>
 
 #include "../base/copyable.h"
 

@@ -11,16 +11,12 @@
 #include <stdio.h>
 
 #include "SysSocket.h"
+#include "error.h"
 
-void error_exit(const char *desp)
-{
-    perror(desp);
-    exit(1);
-}
+using namespace xnet;
 
 /* include Socket */
-int
-Socket(int family, int type, int protocol)
+int sys::Socket(int family, int type, int protocol)
 {
 	int		n;
 	if ( (n = socket(family, type, protocol)) < 0)
@@ -29,16 +25,14 @@ Socket(int family, int type, int protocol)
 }
 /* end Socket */
 
-void
-Bind(int fd, const struct sockaddr *sa, socklen_t salen)
+void sys::Bind(int fd, const struct sockaddr *sa, socklen_t salen)
 {
 	if (bind(fd, sa, salen) < 0)
 		error_exit("bind error");
 }
 
 /* include Listen */
-void
-Listen(int fd, int backlog)
+void sys::Listen(int fd, int backlog)
 {
 	char	*ptr;
 
@@ -51,8 +45,7 @@ Listen(int fd, int backlog)
 }
 /* end Listen */
 
-int 
-Accept(int fd, struct sockaddr *sa, socklen_t *salenptr)
+int sys::Accept(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {
 	int ret;
 
@@ -66,38 +59,35 @@ again:
 	return(ret);
 }
 
-void
-Connect(int fd, const struct sockaddr *sa, socklen_t salen)
+void sys::Connect(int fd, const struct sockaddr *sa, socklen_t salen)
 {
 	if (connect(fd, sa, salen) < 0)
 		error_exit("connect error");
 }
 
 // TODO: may not use it
-void
-Getpeername(int fd, struct sockaddr *sa, socklen_t *salenptr)
+void sys::Getpeername(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {
 	if (getpeername(fd, sa, salenptr) < 0)
 		error_exit("getpeername error");
 }
 
 // TODO: may not use it
-void
-Getsockname(int fd, struct sockaddr *sa, socklen_t *salenptr)
+void sys::Getsockname(int fd, struct sockaddr *sa, socklen_t *salenptr)
 {
 	if (getsockname(fd, sa, salenptr) < 0)
 		error_exit("getsockname error");
 }
 
 // 
-void Getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlenptr)
+void sys::Getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlenptr)
 {
 	if (getsockopt(fd, level, optname, optval, optlenptr) < 0)
 		error_exit("getsockopt error");
 }
 
 // flags defaults: 0
-ssize_t Recv(int fd, void *ptr, size_t nbytes, int flags)
+ssize_t sys::Recv(int fd, void *ptr, size_t nbytes, int flags)
 {
 	ssize_t		n;
 
@@ -112,7 +102,7 @@ again:
 }
 
 // udp may use this
-ssize_t Recvfrom(int fd, void *ptr, size_t nbytes, int flags,
+ssize_t sys::Recvfrom(int fd, void *ptr, size_t nbytes, int flags,
 		 struct sockaddr *sa, socklen_t *salenptr)
 {
 	ssize_t		n;
@@ -123,7 +113,7 @@ ssize_t Recvfrom(int fd, void *ptr, size_t nbytes, int flags,
 }
 
 
-ssize_t Recvmsg(int fd, struct msghdr *msg, int flags)
+ssize_t sys::Recvmsg(int fd, struct msghdr *msg, int flags)
 {
 	ssize_t		n;
 
@@ -134,20 +124,20 @@ ssize_t Recvmsg(int fd, struct msghdr *msg, int flags)
 
 
 
-void Send(int fd, const void *ptr, size_t nbytes, int flags)
+void sys::Send(int fd, const void *ptr, size_t nbytes, int flags)
 {
 	if (send(fd, ptr, nbytes, flags) != (ssize_t)nbytes)
 		error_exit("send error");
 }
 
-void Sendto(int fd, const void *ptr, size_t nbytes, int flags,
+void sys::Sendto(int fd, const void *ptr, size_t nbytes, int flags,
 	   const struct sockaddr *sa, socklen_t salen)
 {
 	if (sendto(fd, ptr, nbytes, flags, sa, salen) != (ssize_t)nbytes)
 		error_exit("sendto error");
 }
 
-void Sendmsg(int fd, const struct msghdr *msg, int flags)
+void sys::Sendmsg(int fd, const struct msghdr *msg, int flags)
 {
 	unsigned int	i;
 	ssize_t			nbytes;
@@ -160,19 +150,19 @@ void Sendmsg(int fd, const struct msghdr *msg, int flags)
 		error_exit("sendmsg error");
 }
 
-void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
+void sys::Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
 {
 	if (setsockopt(fd, level, optname, optval, optlen) < 0)
 		error_exit("setsockopt error");
 }
 
-void Shutdown(int fd, int how)
+void sys::Shutdown(int fd, int how)
 {
 	if (shutdown(fd, how) < 0)
 		error_exit("shutdown error");
 }
 
-int Sockatmark(int fd)
+int sys::Sockatmark(int fd)
 {
 	int		n;
 
@@ -181,7 +171,7 @@ int Sockatmark(int fd)
 	return(n);
 }
 
-void Socketpair(int family, int type, int protocol, int *fd)
+void sys::Socketpair(int family, int type, int protocol, int *fd)
 {
 	int		n;
 

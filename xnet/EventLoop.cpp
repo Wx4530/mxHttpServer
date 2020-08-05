@@ -1,12 +1,15 @@
 /*
- * @Description: 
- * @Version: 1.0
- * @Autor: wx
+ * @description: 
+ * @author: wx
+ * @github: https://github.com/Wx4530/mxHttpServer.git
+ * @lastEditors: wx
  * @Date: 2020-07-28 10:43:48
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-07-29 22:52:02
+ * @LastEditTime: 2020-08-04 23:56:45
+ * @Copyright: 1.0
  */ 
+
 #include <strings.h>
+#include <stdio.h>
 
 #include "../xnet/EventLoop.h"
 #include "../xnet/sysAPI/SysSocket.h"
@@ -21,15 +24,10 @@ void handle_connect(int lfd, int epfd)
     InetAddress caddr;
     Socket cSocket;
     cSocket.fd = sys::Accept(lfd, caddr.sockaddr(), &caddr.len()); 
-    if (cSocket.fd == -1)
-    {
-        perror("accept error");
-        exit(1);
-    }
 
     // 成功建立连接，输出连接信息
     printf("------New Client connected! fd:%d %s\n------",
-        cSocket.fd, caddr.getIpPort_p());
+        cSocket.fd, caddr.getIpPort_p().c_str());
 
     // cfd加入epoll树
     struct epoll_event t_epev;
@@ -62,15 +60,15 @@ void EventLoop::initAllCallBack()
     onMessageCallBack = cb::handle_data;
 }
 
-EventLoop::EventLoop(int lfd)
-    :   m_lsocket(lfd),
-        m_pool()
-{ }
-
-EventLoop::EventLoop(int lfd, int nthrs)
-    :   m_lsocket(lfd),
-        m_pool(nthrs)
-{ }
+EventLoop::EventLoop()
+    :   m_lsocket(),
+        m_pool(18)
+{ 
+    // 创建epoll树 设置监听事件集
+    m_epfd = epoll_create1(EPOLL_CLOEXEC);
+    m_events = new event[MAX_EVENTS];
+    initAllCallBack();
+}
 
 void EventLoop::init()
 {
@@ -90,7 +88,14 @@ void EventLoop::loop()
     for( ; ; )
     {
         // 这里检查不活跃连接, 或者用定时器来管理
-        int t_eventCnt = epoll_wait(m_epfd, m_events, MAX_EVENTS, -1);
+        printf("================= waitting at %s ================\n", );
+        int t_eventCnt = epoll_wait(m_epfd, m_events, MAX_EVENTS, -1);\
+        if(t_eventCnt == -1)
+        {
+            perror("epoll_wait error");
+            exit(1);
+        }
+        printf("epoll_wait return : %d\n", t_eventCnt);
         for(int i = 0; i < t_eventCnt; ++i)
         {
             int fd = m_events[i].data.fd;
@@ -106,11 +111,11 @@ void EventLoop::loop()
     }
 }
 
-// void EventLoop::addClient(int fd)
-// {
-//     event ev;
-//     bzero(&ev, sizeof(ev));
-//     ev.data.fd = fd;
-//     ev.events = EPOLLIN | EPOLLET;
-//     epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev);
-// }
+void EventLoop::addClient(int fd)
+{
+    event ev;
+    bzero(&ev, sizeof(ev));
+    ev.data.fd = fd;
+    ev.events = EPOLLIN | EPOLLET;
+    epoll_ctl(m_epfd, EPOLL_CTL_ADD, fd, &ev);
+}

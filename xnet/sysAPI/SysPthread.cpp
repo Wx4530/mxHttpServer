@@ -1,29 +1,19 @@
 /*
- * @Description: 
- * @Version: 1.0
- * @Autor: wx
+ * @description: 
+ * @author: wx
+ * @github: https://github.com/Wx4530/mxHttpServer.git
+ * @lastEditors: wx
  * @Date: 2020-07-28 10:43:48
- * @LastEditors: wx
- * @LastEditTime: 2020-07-28 17:12:01
+ * @LastEditTime: 2020-07-30 23:41:15
+ * @Copyright: 1.0
  */ 
-/*
- * pthreads wrapper functions.
- */
-#include <errno.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "SysPthread.h"
+#include "error.h"
 
-void error_exit(const char *desp)
-{
-    perror(desp);
-    exit(1);
-}
+using namespace xnet::sys;
 
-void
-xnet::Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
+void Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 			   void * (*func)(void *), void *arg)
 {
 	int		n;
@@ -34,8 +24,7 @@ xnet::Pthread_create(pthread_t *tid, const pthread_attr_t *attr,
 	error_exit("pthread_create error");
 }
 
-void
-xnet::Pthread_join(pthread_t tid, void **status)
+void Pthread_join(pthread_t tid, void **status)
 {
 	int		n;
 
@@ -45,8 +34,7 @@ xnet::Pthread_join(pthread_t tid, void **status)
 	error_exit("pthread_join error");
 }
 
-void
-xnet::Pthread_detach(pthread_t tid)
+void Pthread_detach(pthread_t tid)
 {
 	int		n;
 
@@ -67,8 +55,7 @@ xnet::Pthread_detach(pthread_t tid)
 // 	error_exit("pthread_kill error");
 // }
 
-void
-xnet::Pthread_once(pthread_once_t *ptr, void (*func)(void))
+void Pthread_once(pthread_once_t *ptr, void (*func)(void))
 {
 	int		n;
 
@@ -78,8 +65,7 @@ xnet::Pthread_once(pthread_once_t *ptr, void (*func)(void))
 	error_exit("pthread_once error");
 }
 
-void
-xnet::Pthread_key_create(pthread_key_t *key, void (*func)(void *))
+void Pthread_key_create(pthread_key_t *key, void (*func)(void *))
 {
 	int		n;
 
@@ -89,8 +75,7 @@ xnet::Pthread_key_create(pthread_key_t *key, void (*func)(void *))
 	error_exit("pthread_key_create error");
 }
 
-void
-xnet::Pthread_setspecific(pthread_key_t key, const void *value)
+void Pthread_setspecific(pthread_key_t key, const void *value)
 {
 	int		n;
 
